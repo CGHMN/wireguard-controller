@@ -57,29 +57,6 @@ class WireguardConnector
 	}
 
 	/**
-	 * Writes the configuration file for a Wireguard server
-	 * 
-	 * @param \App\Models\Server $server Server instance to write to file
-	 * @param string $filename Filename to write into, if left blank, /etc/wireguard/$interface.conf will be used
-	 * @param bool $override If override is true, the file contents will be overridden if the file already exists
-	 * @return void
-	 */
-	public static function write_config_file(Server $server, string $filename = null, bool $overwrite = false): void
-	{
-		if (is_file($filename) && !$overwrite) {
-			throw new Exception("File {$filename} already exists, not overwriting");
-		}
-
-		if (is_null($filename)) {
-			$filename = "/etc/wireguard/{$server->interface_name}.conf";
-		}
-
-		$fh = fopen($filename, 'w');
-		fwrite($fh, self::generate_server_config($server));
-		fclose($fh);
-	}
-
-	/**
 	 * Creates a Wireguard interface and assigns IP addresses and routes
 	 * 
 	 * @param \App\Models\Server $server Server instance to bring online
