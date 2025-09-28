@@ -113,9 +113,10 @@ class ServerPeerController extends Controller
 			'peer_id' => $peer->id
 		]);
 
-		WireguardConnector::apply_config($server);
-
 		$peer->load('allowed_ips');
+		
+		$server->refresh();
+		WireguardConnector::apply_config($server);
 
 		$peer->private_key = $private_key;
 		return $peer;
