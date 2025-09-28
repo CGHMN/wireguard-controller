@@ -50,7 +50,7 @@ if [ -d 'vendor' ] && [ -e 'lib/.git' ] && [ "${update_only:-}" != 'y' ]; then
 fi
 
 # ensure all required programs are installed
-for p in php composer yarn; do
+for p in php composer uuid; do
 	if ! which "${p}" >/dev/null; then
 		echo " >> Error: Unable to find program ${p} in your PATH!" >&2
 		echo ' >> Make sure all the dependencies mentioned in the README.md are met before calling this script.' >&2
