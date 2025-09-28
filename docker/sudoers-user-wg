@@ -1,0 +1,2 @@
+user ALL=NOPASSWD: /usr/bin/wg
+user ALL=NOPASSWD: /sbin/ip

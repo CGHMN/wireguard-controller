@@ -1,0 +1,70 @@
+services:
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    ports:
+      - 8000:80
+      - 51820:51820
+    volumes:
+      - ./:/var/www/html
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    env_file:
+      - path: ./.env
+        required: true
+    environment:
+      - SEED=true
+    command: "/bin/sh /entrypoint.sh"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:lts-ubi9
+    ports:
+      - 3306:3306
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    environment:
+      MARIADB_DATABASE: "app-dev"
+      MARIADB_ROOT_PASSWORD: "password"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  
+  redis:
+    image: redis:8.2.1-alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+  
+  dbadmin:
+    image: adminer:latest
+    ports:
+      - 8080:8080
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    ports:
+      - "8081:5540"
+    environment: {     
+      RI_DATABASE_MANAGEMENT: false,
+      RI_REDIS_HOST: "redis",
+    }
+
+  mailcatcher:
+    image: dockage/mailcatcher:latest
+    ports:
+      - 8082:1080
+
+volumes:
+  app-storage: {}
+  mariadb-data: {}
+  redis-data: {}
