@@ -37,10 +37,6 @@ RUN sed -i '1s/^/user user;\n/' /etc/nginx/nginx.conf
 # Copy sudoers file to allow user to control Wireguard tunnels
 COPY docker/sudoers-user-wg /etc/sudoers.d/
 
-# Allow user to write to /etc/wireguard directory
-RUN chown root:user /etc/wireguard && \
-	chmod 0770 /etc/wireguard
-
 FROM base AS production
 
 # Install composer dependencies
