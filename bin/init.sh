@@ -60,7 +60,7 @@ done
 
 # ensure required php modules are installed
 for m in \
-	ctype curl dom fileinfo filter hash mbstring openssl pcre PDO pdo_mysql \
+	ctype curl dom fileinfo filter hash mbstring openssl pcre PDO sqlite3 \
 	session redis tokenizer xml \
 	sodium gd xmlwriter SimpleXML
 do
