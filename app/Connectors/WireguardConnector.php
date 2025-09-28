@@ -131,7 +131,8 @@ class WireguardConnector
 		);
 
 		$allowed_ips = [
-			$server_tunnel_network
+			$server_tunnel_network,
+			$server->routed_subnet
 		];
 
 		foreach($server->allowed_ips as $ip) {
@@ -149,6 +150,7 @@ class WireguardConnector
 		PublicKey = {$server->public_key}
 		AllowedIPs = {$allowed_ips_str}
 		Endpoint = {$server->endpoint}:{$server->listen_port}
+		\n
 		PEER_CONFIG;
 	}
 

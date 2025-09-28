@@ -75,6 +75,15 @@ class ServerPeerController extends Controller
 	}
 
 	/**
+	 * Generate the peer Wireguard configuration for the specified server and peer
+	 */
+	public function generate_peer_configuration(Request $request, string $server_id, string $peer_id)
+	{
+		$server = Server::findOrFail($server_id);
+		return WireguardConnector::generate_peer_config($server, $peer_id);
+	}
+
+	/**
 	 * Generate a peer with most fields auto-generated
 	 */
 	public function generate_new_peer(Request $request, string $server_id)

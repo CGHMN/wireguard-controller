@@ -23,6 +23,7 @@ Route::prefix('v1')
 
 		Route::post('servers/{server_id}/reload', [WireguardController::class, 'reload']);
 		Route::post('servers/{server_id}/gen_new_peer', [ServerPeerController::class, 'generate_new_peer']);
+		Route::get('servers/{server_id}/peers/{peer_id}/config', [ServerPeerController::class, 'generate_peer_configuration']);
 	});
 
 Route::get('/user', function (Request $request) {
