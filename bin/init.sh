@@ -103,6 +103,11 @@ if ! grep -qE '^API_KEY=.+' .env; then
 	sed -i "s/^API_KEY=/API_KEY=$(uuid)/" .env
 fi
 
+# create sqlite3 database
+source .env
+mkdir -p -- "$(dirname "${DB_DATABASE}")" 2>/dev/null || :
+touch "${DB_DATABASE}"
+
 echo ' >> All done!'
 echo ' >> Now you can run "./bin/dev-server.sh" to start the development server,'
 echo ' >> run "./bin/docker-artisan.sh migrate:fresh --seed" to seed the database and'
