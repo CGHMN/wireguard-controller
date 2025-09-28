@@ -61,8 +61,7 @@ done
 # ensure required php modules are installed
 for m in \
 	ctype curl dom fileinfo filter hash mbstring openssl pcre PDO sqlite3 \
-	session redis tokenizer xml \
-	sodium gd xmlwriter SimpleXML
+	session tokenizer xml sodium gd xmlwriter SimpleXML
 do
 	if ! grep -qE "^${m}$" <(php -m); then
 		echo " >> Error: This project requires the PHP module ${m} to be installed and loaded!" >&2
