@@ -80,7 +80,7 @@ class WireguardConnector
 
 		$allowed_ips_str = join(', ', $allowed_ips);
 
-		return <<<PEER_CONFIG
+		$output = <<<PEER_CONFIG
 		[Interface]
 		Address = {$peer->tunnel_ip}
 		PrivateKey = <insert-private-key-here>
@@ -90,8 +90,13 @@ class WireguardConnector
 		AllowedIPs = {$allowed_ips_str}
 		Endpoint = {$server->endpoint}:{$server->listen_port}
 		PersistentKeepalive = 15
-		\n
 		PEER_CONFIG;
+
+		if ($peer->preshared_key) {
+			$output .= "\nPresharedKey = {$peer->preshared_key}\n";
+		}
+
+		return $output;
 	}
 
 	/**
