@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Connectors\WireguardConnector;
+use App\Helpers\IpAddressHelper;
 use App\Helpers\ServerHelper;
 use App\Models\PeerAllowedIp;
 use App\Models\Server;
@@ -31,7 +32,6 @@ class ServerPeerController extends Controller
 	public function store(Request $request, string $server_id)
 	{
 		$server = Server::findOrFail($server_id);
-
 		return Peer::create([
 			...$request->all(),
 			'server_id' => $server->id
@@ -68,7 +68,7 @@ class ServerPeerController extends Controller
 	public function destroy(string $server_id, string $peer_id)
 	{
 		$server = Server::findOrFail($server_id);
-		
+
 		return Peer::where('server_id', $server->id)
 			->findOrFail($peer_id)
 			->delete();
@@ -107,18 +107,27 @@ class ServerPeerController extends Controller
 			'server_id' => $server->id
 		]);
 
-		$routed_subnet = ServerHelper::get_next_routed_subnet($server, 24);
+		$routed_subnet = IpAddressHelper::routed_subnet_from_tunnel_ip($peer->tunnel_ip, $server->routed_subnet);
+		if (PeerAllowedIp::firstWhere('cidr', $routed_subnet)) {
+			throw new Exception("The routed subnet {$routed_subnet} for this peer is already in use");
+		}
+
 		PeerAllowedIp::create([
 			'cidr' => $routed_subnet,
 			'peer_id' => $peer->id
 		]);
 
 		$peer->load('allowed_ips');
-		
+
 		$server->refresh();
 		WireguardConnector::apply_config($server);
 
 		$peer->private_key = $private_key;
+
+		if ($request->input('return_config') == "true") {
+			return WireguardConnector::generate_peer_config($server, $peer->id);
+		}
+
 		return $peer;
 	}
 }

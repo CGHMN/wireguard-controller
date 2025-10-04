@@ -25,7 +25,7 @@ class IpAddressHelper
 	 */
 	public static function mask_from_cidr(string $cidr): string
 	{
-		if (!preg_match('~/(\d+)$~', $cidr, $matches)) {
+		if (! preg_match('~/(\d+)$~', $cidr, $matches)) {
 			throw new Exception("Missing CIDR mask in {$cidr}");
 		}
 
@@ -45,7 +45,7 @@ class IpAddressHelper
 
 		return long2ip(
 			ip2long($cidr_parts[0]) & ip2long(self::mask_from_cidr($cidr))
-		) . ($with_cidr_mask? "/{$cidr_parts[1]}" : '');
+		).($with_cidr_mask ? "/{$cidr_parts[1]}" : '');
 	}
 
 	public static function broadcast_address_from_cidr(string $cidr, bool $with_cidr_mask = true): string
@@ -66,5 +66,19 @@ class IpAddressHelper
 	public static function strip_cidrmask($cidr): string
 	{
 		return explode('/', $cidr)[0];
+	}
+
+	/**
+	 * Tries to find the routed subnet CIDR matching to a give tunnel IP
+	 * @param string $tunnel_ip Tunnel IP either as standalone IPv4 address or in CIDR notation
+	 * @param string $routed_subnet_cidr Base routed subnet IP address in CIDR notation
+	 * @return ?string Matching routed subnet for the tunnel in CIDR notation
+	 */
+	public static function routed_subnet_from_tunnel_ip(string $tunnel_ip, string $routed_subnet_cidr, int $routed_subnet_size = 24): string
+	{
+		preg_match('~(\d+)\.(\d+)\.(\d+)\.(\d+)/?(\d+)?~', $routed_subnet_cidr, $ro);
+		preg_match('~(\d+)\.(\d+)\.(\d+)\.(\d+)/?(\d+)?~', $tunnel_ip, $to);
+
+		return "{$ro[1]}.{$ro[2]}.{$to[4]}.{$ro[4]}/{$routed_subnet_size}";
 	}
 }
