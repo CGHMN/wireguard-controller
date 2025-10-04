@@ -19,7 +19,7 @@ return new class extends Migration
 
 			$table->foreignId('peer_id')
 				->cascadeOnUpdate()
-				->cascadeOnDelete();
+				->restrictOnDelete();
         });
     }
 
