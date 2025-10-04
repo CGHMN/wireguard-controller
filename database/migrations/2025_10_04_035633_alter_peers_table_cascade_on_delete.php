@@ -6,15 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::table('peers', function (Blueprint $table) {
-			// $table->dropForeign('user_id');
-			// $table->dropForeign('server_id');
-
+	/**
+	 * Run the migrations.
+	 */
+	public function up(): void
+	{
+		Schema::table('peers', function (Blueprint $table) {
 			$table->foreign('user_id')
 				->references('id')
 				->on('users')
@@ -28,13 +25,13 @@ return new class extends Migration
 				->cascadeOnUpdate()
 				->cascadeOnDelete();
 		});
-    }
+	}
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        //
-    }
+	/**
+	 * Reverse the migrations.
+	 */
+	public function down(): void
+	{
+		//
+	}
 };
