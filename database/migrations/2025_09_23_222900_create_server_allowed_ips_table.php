@@ -19,7 +19,7 @@ return new class extends Migration
 
 			$table->foreignId('server_id')
 				->cascadeOnUpdate()
-				->restrictOnDelete();
+				->cascadeOnDelete();
         });
     }
 

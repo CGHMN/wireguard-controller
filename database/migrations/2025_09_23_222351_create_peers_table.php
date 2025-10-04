@@ -23,11 +23,11 @@ return new class extends Migration
 			$table->foreignId('user_id')
 				->nullable()
 				->cascadeOnUpdate()
-				->restrictOnDelete();
+				->cascadeOnDelete();
 
 			$table->foreignId('server_id')
 				->cascadeOnUpdate()
-				->restrictOnDelete();
+				->cascadeOnDelete();
         });
     }
 
