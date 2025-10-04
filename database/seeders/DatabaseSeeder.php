@@ -11,12 +11,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-		$this->call(UserSeeder::class);
+		//$this->call(UserSeeder::class);
 
 		$this->call(ServerSeeder::class);
 		$this->call(ServerAllowedIpSeeder::class);
 
-		$this->call(PeerSeeder::class);
-		$this->call(PeerAllowedIpSeeder::class);
+		//$this->call(PeerSeeder::class);
+		//$this->call(PeerAllowedIpSeeder::class);
     }
 }
