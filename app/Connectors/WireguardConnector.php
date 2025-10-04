@@ -136,6 +136,20 @@ class WireguardConnector
 		Process::input(self::generate_server_config($server))
 			->run("sudo /usr/bin/wg setconf '{$server->interface_name}' /dev/stdin")
 			->throw();
+
+		// Add routes too
+		$ip_route = json_decode(exec("ip --json route"));
+		$known_routes = [];
+		foreach ($ip_route as $route) $known_routes[] = $route->dst;
+		foreach ($server->peers as $peer) {
+			foreach ($peer->allowed_ips as $ip) {
+				if (!in_array($ip->cidr, $known_routes)) {
+					$known_routes[] = $ip->cidr;
+					Process::run("sudo /sbin/ip route add {$ip->cidr} dev {$server->interface_name}")
+						->throw();
+				}
+			}
+		}
 	}
 
 	/**
