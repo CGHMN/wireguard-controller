@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Models\Peer;
+use App\Models\PeerAllowedIp;
 use App\Models\Server;
 use Exception;
 use Log;
@@ -24,7 +26,7 @@ class ServerHelper
 
 		$existing_ips = [];
 
-		foreach($server->peers->pluck('tunnel_ip')->toArray() as $ip) {
+		foreach (Peer::get()->pluck('tunnel_ip')->toArray() as $ip) {
 			$existing_ips[] = ip2long(IpAddressHelper::strip_cidrmask($ip));
 		}
 
@@ -44,7 +46,7 @@ class ServerHelper
 	public static function get_next_routed_subnet(Server $server, $size = 24): string
 	{
 		$ips_per_subnet = (2 ** (32 - $size));
-		
+
 		$first_address = ip2long(
 			IpAddressHelper::network_address_from_cidr($server->routed_subnet, false)
 		);
@@ -54,10 +56,8 @@ class ServerHelper
 
 		$existing_ips = [];
 
-		foreach ($server->peers as $peer) {
-			foreach ($peer->allowed_ips as $ip) {
-				$existing_ips[] = ip2long(IpAddressHelper::strip_cidrmask($ip->cidr));
-			}
+		foreach (PeerAllowedIp::get() as $allowed_ip) {
+			$existing_ips[] = ip2long(IpAddressHelper::strip_cidrmask($allowed_ip->cidr));
 		}
 
 		for ($i = $first_address; $i <= $last_address; $i += $ips_per_subnet) {
