@@ -99,18 +99,23 @@ class ServerPeerController extends Controller
 			$private_key = $keys->private_key;
 		}
 
+		$tunnel_ip = ServerHelper::get_next_tunnel_ip($server);
+
+		$routed_subnet = IpAddressHelper::routed_subnet_from_tunnel_ip($tunnel_ip, $server->routed_subnet);
+		if ($allowed_ip_in_use = PeerAllowedIp::firstWhere('cidr', $routed_subnet)) {
+			throw new Exception("The routed subnet {$routed_subnet} for this peer is already in use by user ID {$allowed_ip_in_use->user_id}");
+		}
+
+		// Generate PSK only if query parameter 'no_psk' is not set
+		$psk = $request->query('no_psk')? null : WireguardConnector::generate_psk();
+
 		$peer = Peer::create([
 			'name' => $request->string('name'),
 			'public_key' => $public_key,
-			'preshared_key' => WireguardConnector::generate_psk(),
-			'tunnel_ip' => ServerHelper::get_next_tunnel_ip($server),
+			'preshared_key' => $psk,
+			'tunnel_ip' => $tunnel_ip,
 			'server_id' => $server->id
 		]);
-
-		$routed_subnet = IpAddressHelper::routed_subnet_from_tunnel_ip($peer->tunnel_ip, $server->routed_subnet);
-		if (PeerAllowedIp::firstWhere('cidr', $routed_subnet)) {
-			throw new Exception("The routed subnet {$routed_subnet} for this peer is already in use");
-		}
 
 		PeerAllowedIp::create([
 			'cidr' => $routed_subnet,
@@ -122,6 +127,7 @@ class ServerPeerController extends Controller
 		$server->refresh();
 		WireguardConnector::apply_config($server);
 
+		// Add private key to this peer for the HTTP response, but do not save it into the database
 		$peer->private_key = $private_key;
 
 		if ($request->input('return_config') == "true") {
