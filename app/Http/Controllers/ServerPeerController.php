@@ -103,7 +103,7 @@ class ServerPeerController extends Controller
 
 		$routed_subnet = IpAddressHelper::routed_subnet_from_tunnel_ip($tunnel_ip, $server->routed_subnet);
 		if ($allowed_ip_in_use = PeerAllowedIp::firstWhere('cidr', $routed_subnet)) {
-			throw new Exception("The routed subnet {$routed_subnet} for this peer is already in use by user ID {$allowed_ip_in_use->user_id}");
+			throw new Exception("The routed subnet {$routed_subnet} for this peer is already in use by user ID {$allowed_ip_in_use->peer_id}");
 		}
 
 		// Generate PSK only if query parameter 'no_psk' is not set
