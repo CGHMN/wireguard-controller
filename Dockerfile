@@ -11,7 +11,7 @@ RUN apk add --no-cache \
 	nodejs yarn \
 	php84 php84-ctype php84-dom php84-fileinfo php84-pdo php84-pdo_mysql php84-session \
 	php84-pecl-redis php84-tokenizer php84-xml php84-sodium php84-gd php84-xmlwriter php84-simplexml \
-	php84-iconv \
+	php84-iconv php84-pdo_sqlite \
 	wireguard-tools sudo
 
 WORKDIR /var/www/html
