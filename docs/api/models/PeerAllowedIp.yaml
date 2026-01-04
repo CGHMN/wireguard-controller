@@ -1,0 +1,24 @@
+title: "AllowedIP entry for a peer"
+description: "Represents an IP address or CIDR subnet the the server will route towards a peer"
+type: object
+required:
+  - cidr
+properties:
+  id:
+    title: "ID"
+    description: "ID"
+    type: integer
+    example: 1
+    readOnly: true
+  cidr:
+    title: "IP CIDR"
+    description: "IP address or subnet in CIDR notation, single IPs can be written using /32"
+    type: string
+    format: ipv4
+    example: "100.65.2.0/24"
+  peer_id:
+    title: "Peer ID"
+    description: "ID of the peer this AllowedIP entry belongs to"
+    type: integer
+    example: 1
+    readOnly: true

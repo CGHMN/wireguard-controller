@@ -1,0 +1,67 @@
+title: "Wireguard server instance"
+description: "Represents a Wireguard server instance on the host"
+type: object
+required:
+  - name
+  - interface_name
+  - private_key
+  - public_key
+  - endpoint
+  - listen_port
+  - mtu
+  - tunnel_ip
+  - routed_subnet
+properties:
+  id:
+    title: "ID"
+    description: "ID"
+    type: integer
+    example: 1
+    readOnly: true
+  name:
+    title: "Instance Name"
+    description: "Human readable name of the server instance"
+    type: string
+    example: "Primary Wireguard Server"
+  private_key:
+    title: "Wireguard Private Key"
+    description: "Private Key of the Wireguard server instance"
+    type: string
+    format: base64
+    example: "cKka/80hKhH77QfqKX9FcmtoOICk4wH+sftB/j9Gi0Q="
+  public_key:
+    title: "Wireguard Public Key"
+    description: "Public Key of the Wireguard server instance"
+    type: string
+    format: base64
+    example: "Wg+je/GrQrDV6Ik8ffHwRP1GKKeip876lT+HQVKJ4A0="
+  endpoint:
+    title: "Endpoint Address"
+    description: "Hostname or IP address of the server instace"
+    type: string
+    example: "wg01.some.domain.tld"
+  listen_port:
+    title: "Listen Port"
+    description: "Port the server instace listens on"
+    type: integer
+    minimum: 1
+    maximum: 65535
+    example: 51820
+  mtu:
+    title: "Tunnel MTU Value"
+    description: "MTU value of the tunnel network interface"
+    type: integer
+    minimum: 68
+    example: 1320
+  tunnel_ip:
+    title: "Inner Tunnel IP Address"
+    description: "IP address of the tunnel interface on the server side"
+    type: string
+    format: ipv4
+    example: "100.64.0.1/24"
+  routed_subnet:
+    title: "Routed Subnet Block"
+    description: "Subnet block from which smaller subnets are routed to peers"
+    type: string
+    format: ipv4
+    example: "100.65.0.0/16"

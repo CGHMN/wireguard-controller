@@ -1,0 +1,86 @@
+get:
+  summary: "Get single Wireguard server instance"
+  description: "Returns a single Wireguard server instance by its ID"
+  tags:
+    - Servers
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the Wireguard server instance to get"
+      required: true
+      schema:
+        type: integer
+        example: 1
+  responses:
+    200:
+      description: "OK"
+      content:
+        application/json:
+          schema:
+            allOf: # Merge allowed_ips and peers properties into Server model
+              - $ref: "../../../models/Server.yaml"
+              - $ref: "../../../response_types/array_of_ServerAllowedIp.yaml"
+              - $ref: "../../../response_types/array_of_Peer.yaml"
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "Wireguard server instance not found"
+
+put:
+  summary: "Update a Wireguard server instance"
+  description: "Updates a Wireguard server instance"
+  tags:
+    - Servers
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the Wireguard server instance to update"
+      required: true
+      schema:
+        type: integer
+        example: 1
+  requestBody:
+    description: "Wireguard server instance data"
+    content:
+      application/json:
+        schema:
+          $ref: "../../../models/Server.yaml"
+  responses:
+    200:
+      description: "OK, returns the Wireguard server instance"
+      content:
+        application/json:
+          schema:
+            $ref: "../../../models/Server.yaml"
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "Wireguard server instance not found"
+
+delete:
+  summary: "Delete a Wireguard server instance"
+  description: "Deletes an existing Wireguard server instance by its ID"
+  tags:
+    - Servers
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the Wireguard server instance to delete"
+      required: true
+      schema:
+        type: integer
+        example: 1
+  responses:
+    200:
+      description: "OK, always returns true"
+      content:
+        application/json:
+          schema:
+            type: boolean
+            enum:
+              - true
+            example: true
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "Wireguard server instance not found"

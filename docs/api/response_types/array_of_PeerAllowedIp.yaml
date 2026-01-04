@@ -1,0 +1,7 @@
+title: "Array of AllowedIP entries for a Wireguard Peer"
+type: object
+properties:
+  allowed_ips:
+    type: array
+    items:
+      $ref: "../models/PeerAllowedIp.yaml"

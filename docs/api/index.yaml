@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: "CGHMN Wireguard Server API"
+  description: |
+    This API offers a way to programmatically configure a live Wireguard server through HTTP calls.
+
+    Note: Except for the `/servers/{server_id}/gen_new_peer` route, no other route automatically reloads the server on configuration changes!
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: "Local development server"
+
+paths:
+  /api/v1/servers:
+    $ref: "./routes/api/v1/servers.yaml"
+  /api/v1/servers/{server_id}:
+    $ref: "./routes/api/v1/servers-by-id.yaml"
+  /api/v1/servers/{server_id}/allowed_ips:
+    $ref: "./routes/api/v1/servers/allowed_ips.yaml"
+  /api/v1/servers/{server_id}/allowed_ips/{allowed_ip_id}:
+    $ref: "./routes/api/v1/servers/allowed_ips-by-id.yaml"
+  /api/v1/servers/{server_id}/gen_new_peer:
+    $ref: "./routes/api/v1/servers/gen_new_peer.yaml"
+  /api/v1/servers/{server_id}/peers:
+    $ref: "./routes/api/v1/servers/peers.yaml"
+  /api/v1/servers/{server_id}/peers/{peer_id}:
+    $ref: "./routes/api/v1/servers/peers-by-id.yaml"
+  /api/v1/servers/{server_id}/peers/{peer_id}/allowed_ips:
+    $ref: "./routes/api/v1/servers/peers/allowed_ips.yaml"
+  /api/v1/servers/{server_id}/peers/{peer_id}/allowed_ips/{allowed_ip_id}:
+    $ref: "./routes/api/v1/servers/peers/allowed_ips-by-id.yaml"
+  /api/v1/servers/{server_id}/reload:
+    $ref: "./routes/api/v1/servers/reload.yaml"
+
+components:
+  schemas:
+    Server:
+      $ref: "models/Server.yaml"
+    ServerAllowedIp:
+      $ref: "models/ServerAllowedIp.yaml"
+    Peer:
+      $ref: "models/Peer.yaml"
+    PeerAllowedIp:
+      $ref: "models/PeerAllowedIp.yaml"
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: "X-API-Key"
+
+tags:
+  - name: Servers
+    description: "Wireguard Server Instances"
+  - name: Peers
+    description: "Wireguard Peers"
+  - name: "Server AllowedIPs"
+    description: "AllowedIP entries for Wireguard server instances"
+  - name: "Peer AllowedIPs"
+    description: "AllowedIP entries for Wireguard Peers"
+
+security:
+  - apiKeyAuth: [] # use the same name as listed in securitySchemes

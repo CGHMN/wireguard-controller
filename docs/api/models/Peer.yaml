@@ -1,0 +1,43 @@
+title: "Wireguard Peer"
+description: "Represents a Wireguard Peer on a local Wireguard server instance"
+type: object
+required:
+  - name
+  - public_key
+  - tunnel_ip
+  - preshared_key
+properties:
+  id:
+    title: "ID"
+    description: "ID"
+    type: integer
+    example: 1
+    readOnly: true
+  name:
+    title: "Name"
+    description: "Human readable peer name"
+    type: string
+    example: "John Doe CGHMN Router"
+  public_key:
+    title: "Wireguard Public Key"
+    description: "Public key of the Wireguard peer"
+    type: string
+    format: base64
+    example: "+2AEUd4r3usyz4Rw6Gh4gMD6BX9EhTTq0dYNblNUNGM="
+  tunnel_ip:
+    title: "Tunnel IP address"
+    description: "IP address of the peer inside the tunnel network in CIDR notation with /32"
+    type: string
+    format: ipv4
+    example: "100.64.0.2/32"
+  user_id:
+    title: "User ID"
+    description: "ID of the user this peer belongs to (not currently used)"
+    type: integer
+    nullable: true
+    example: null
+  server_id:
+    title: "Server ID"
+    description: "ID of the server this peer belongs to"
+    type: integer
+    example: 1

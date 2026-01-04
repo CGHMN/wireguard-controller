@@ -1,0 +1,39 @@
+get:
+  summary: "Get listing of all Wireguard server instances"
+  description: "Returns a list of all existing Wireguard server instances"
+  tags:
+    - Servers
+  responses:
+    200:
+      description: "OK"
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              allOf: # Merge allowed_ips property into Server model
+                - $ref: "../../../models/Server.yaml"
+                - $ref: "../../../response_types/array_of_ServerAllowedIp.yaml"
+    401:
+      description: "Missing or invalid X-API-Key header"
+
+post:
+  summary: "Create a new Wireguard server instance"
+  description: "Inserts a new Wireguard server instance, but does not reload the servers automatically"
+  tags:
+    - Servers
+  requestBody:
+    description: "Wireguard server instance data"
+    content:
+      application/json:
+        schema:
+          $ref: "../../../models/Server.yaml"
+  responses:
+    200:
+      description: "OK, returns the full Wireguard server instance after instantiating the model"
+      content:
+        application/json:
+          schema:
+            $ref: "../../../models/Server.yaml"
+    401:
+      description: "Missing or invalid X-API-Key header"

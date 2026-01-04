@@ -1,0 +1,27 @@
+post:
+  summary: "Reload Wireguard server instance"
+  description: "Reloads a Wireguard server instance to apply new configuration changes"
+  tags:
+    - Servers
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the Wireguard server instance to reload"
+      required: true
+      schema:
+        type: integer
+        example: 1
+  responses:
+    200:
+      description: "OK, always returns true"
+      content:
+        application/json:
+          schema:
+            type: boolean
+            enum:
+              - true
+            example: true
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "Wireguard server instance not found"

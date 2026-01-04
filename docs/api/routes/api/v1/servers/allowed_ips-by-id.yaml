@@ -1,0 +1,104 @@
+get:
+  summary: "Get single AllowedIP entry"
+  description: "Returns a single AllowedIP entry by its ID"
+  tags:
+    - "Server AllowedIPs"
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the parent Wireguard server instance"
+      required: true
+      schema:
+        type: integer
+        example: 1
+    - name: allowed_ip_id
+      in: path
+      description: "ID of the AllowedIP entry"
+      required: true
+      schema:
+        type: integer
+        example: 1
+  responses:
+    200:
+      description: "OK"
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../models/ServerAllowedIp.yaml"
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "AllowedIP entry not found"
+
+put:
+  summary: "Update an AllowedIP entry"
+  description: "Updates an AllowedIP entry"
+  tags:
+    - "Server AllowedIPs"
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the parent Wireguard server instance"
+      required: true
+      schema:
+        type: integer
+        example: 1
+    - name: allowed_ip_id
+      in: path
+      description: "ID of the AllowedIP entry"
+      required: true
+      schema:
+        type: integer
+        example: 1
+  requestBody:
+    description: "AllowedIP entry data"
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../models/ServerAllowedIp.yaml"
+  responses:
+    200:
+      description: "OK, returns the updated AllowedIP entry"
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../models/ServerAllowedIp.yaml"
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "AllowedIP entry not found"
+
+delete:
+  summary: "Remove an AllowedIP entry from a Wireguard server instance"
+  description: "Removes an existing AllowedIP entry from a Wireguard server instance by its ID"
+  tags:
+    - "Server AllowedIPs"
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the parent Wireguard server instance"
+      required: true
+      schema:
+        type: integer
+        example: 1
+    - name: allowed_ip_id
+      in: path
+      description: "ID of the AllowedIP entry"
+      required: true
+      schema:
+        type: integer
+        example: 1
+  responses:
+    200:
+      description: "OK, always returns true"
+      content:
+        application/json:
+          schema:
+            type: boolean
+            enum:
+              - true
+            example: true
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "AllowedIP entry not found"

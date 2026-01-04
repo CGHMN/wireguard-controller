@@ -1,0 +1,72 @@
+post:
+  summary: "Generate a peer configuration"
+  description: "Generates a new peer configuration for a Wireguard server instance"
+  tags:
+    - Peers
+  parameters:
+    - name: server_id
+      in: path
+      description: "ID of the parent Wireguard server instance"
+      required: true
+      schema:
+        type: integer
+        example: 1
+    - name: public_key
+      in: query
+      description: "Wireguard Public Key of the peer, if a key pair already exists. If not, one is generated"
+      required: false
+      schema:
+        type: string
+        format: base64
+        example: "+2AEUd4r3usyz4Rw6Gh4gMD6BX9EhTTq0dYNblNUNGM="
+    - name: no_psk
+      in: query
+      description: "If set, no PSK will be generated for the new peer"
+      required: false
+      schema:
+        type: boolean
+        default: false
+        example: true
+      allowEmptyValue: true
+    - name: name
+      in: query
+      description: "Human readable name of the new peer"
+      required: true
+      schema:
+        type: string
+        example: "John Doe CGHMN Router"
+    - name: return_config
+      in: query
+      description: "If set, the raw Wireguard configuration will be returned instead of the Peer model instance"
+      required: false
+      schema:
+        type: boolean
+        default: false
+        example: true
+      allowEmptyValue: true
+
+  responses:
+    200:
+      description: "OK, returns the raw Wireguard peer configuration if `return_config` is set to `true` or the Peer model instance as JSON otherwise"
+      content:
+        text/plain:
+          schema:
+            type: string
+            example: |
+              [Interface]
+              Address = 100.64.0.2/32
+              PrivateKey = YH0eP17O/udcblEzHHBVNW+HrIvLWcY3U1RILA8ISVI=
+
+              [Peer]
+              PublicKey = Wg+je/GrQrDV6Ik8ffHwRP1GKKeip876lT+HQVKJ4A0=
+              AllowedIPs = 100.64.0.0/10
+              Endpoint = wg01.some.domain.tld:51820
+              PersistentKeepalive = 15
+        application/json:
+          schema:
+            $ref: "../../../../models/Peer.yaml"
+
+    401:
+      description: "Missing or invalid X-API-Key header"
+    404:
+      description: "Wireguard server instance not found"

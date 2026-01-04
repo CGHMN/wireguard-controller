@@ -1,0 +1,1393 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CGHMN Wireguard Server API",
+    "description": "This API offers a way to programmatically configure a live Wireguard server through HTTP calls.\n\nNote: Except for the `/servers/{server_id}/gen_new_peer` route, no other route automatically reloads the server on configuration changes!\n",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development server"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Servers",
+      "description": "Wireguard Server Instances"
+    },
+    {
+      "name": "Peers",
+      "description": "Wireguard Peers"
+    },
+    {
+      "name": "Server AllowedIPs",
+      "description": "AllowedIP entries for Wireguard server instances"
+    },
+    {
+      "name": "Peer AllowedIPs",
+      "description": "AllowedIP entries for Wireguard Peers"
+    }
+  ],
+  "paths": {
+    "/api/v1/servers": {
+      "get": {
+        "summary": "Get listing of all Wireguard server instances",
+        "description": "Returns a list of all existing Wireguard server instances",
+        "tags": [
+          "Servers"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Server"
+                      },
+                      {
+                        "$ref": "#/components/schemas/array_of_ServerAllowedIp"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new Wireguard server instance",
+        "description": "Inserts a new Wireguard server instance, but does not reload the servers automatically",
+        "tags": [
+          "Servers"
+        ],
+        "requestBody": {
+          "description": "Wireguard server instance data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the full Wireguard server instance after instantiating the model",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Server"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}": {
+      "get": {
+        "summary": "Get single Wireguard server instance",
+        "description": "Returns a single Wireguard server instance by its ID",
+        "tags": [
+          "Servers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the Wireguard server instance to get",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Server"
+                    },
+                    {
+                      "$ref": "#/components/schemas/array_of_ServerAllowedIp"
+                    },
+                    {
+                      "$ref": "#/components/schemas/array_of_Peer"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Wireguard server instance",
+        "description": "Updates a Wireguard server instance",
+        "tags": [
+          "Servers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the Wireguard server instance to update",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Wireguard server instance data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Server"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the Wireguard server instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Server"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a Wireguard server instance",
+        "description": "Deletes an existing Wireguard server instance by its ID",
+        "tags": [
+          "Servers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the Wireguard server instance to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, always returns true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "enum": [
+                    true
+                  ],
+                  "example": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/allowed_ips": {
+      "get": {
+        "summary": "Get listing of all AllowedIPs of a Wireguard server instance",
+        "description": "Returns a list of all existing AllowedIP entries of a Wireguard server instance",
+        "tags": [
+          "Server AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServerAllowedIp"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add new AllowedIP to Wireguard server instance",
+        "description": "Adds an AllowedIP entry to a Wireguard server instance, which will be included in client configurations for the server instance",
+        "tags": [
+          "Server AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "AllowedIP entry data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerAllowedIp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the added AllowedIP entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerAllowedIp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/allowed_ips/{allowed_ip_id}": {
+      "get": {
+        "summary": "Get single AllowedIP entry",
+        "description": "Returns a single AllowedIP entry by its ID",
+        "tags": [
+          "Server AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "allowed_ip_id",
+            "in": "path",
+            "description": "ID of the AllowedIP entry",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerAllowedIp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "AllowedIP entry not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an AllowedIP entry",
+        "description": "Updates an AllowedIP entry",
+        "tags": [
+          "Server AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "allowed_ip_id",
+            "in": "path",
+            "description": "ID of the AllowedIP entry",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "AllowedIP entry data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerAllowedIp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the updated AllowedIP entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerAllowedIp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "AllowedIP entry not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove an AllowedIP entry from a Wireguard server instance",
+        "description": "Removes an existing AllowedIP entry from a Wireguard server instance by its ID",
+        "tags": [
+          "Server AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "allowed_ip_id",
+            "in": "path",
+            "description": "ID of the AllowedIP entry",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, always returns true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "enum": [
+                    true
+                  ],
+                  "example": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "AllowedIP entry not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/gen_new_peer": {
+      "post": {
+        "summary": "Generate a peer configuration",
+        "description": "Generates a new peer configuration for a Wireguard server instance",
+        "tags": [
+          "Peers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "public_key",
+            "in": "query",
+            "description": "Wireguard Public Key of the peer, if a key pair already exists. If not, one is generated",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "base64",
+              "example": "+2AEUd4r3usyz4Rw6Gh4gMD6BX9EhTTq0dYNblNUNGM="
+            }
+          },
+          {
+            "name": "no_psk",
+            "in": "query",
+            "description": "If set, no PSK will be generated for the new peer",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "example": true
+            },
+            "allowEmptyValue": true
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Human readable name of the new peer",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "John Doe CGHMN Router"
+            }
+          },
+          {
+            "name": "return_config",
+            "in": "query",
+            "description": "If set, the raw Wireguard configuration will be returned instead of the Peer model instance",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "example": true
+            },
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, returns the raw Wireguard peer configuration if `return_config` is set to `true` or the Peer model instance as JSON otherwise",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "[Interface]\nAddress = 100.64.0.2/32\nPrivateKey = YH0eP17O/udcblEzHHBVNW+HrIvLWcY3U1RILA8ISVI=\n\n[Peer]\nPublicKey = Wg+je/GrQrDV6Ik8ffHwRP1GKKeip876lT+HQVKJ4A0=\nAllowedIPs = 100.64.0.0/10\nEndpoint = wg01.some.domain.tld:51820\nPersistentKeepalive = 15\n"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Peer"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/peers": {
+      "get": {
+        "summary": "Get listing of all peers of a Wireguard server instance",
+        "description": "Returns a list of all existing peers of a Wireguard server instance",
+        "tags": [
+          "Peers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Peer"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add new Peer to Wireguard server instance",
+        "description": "Adds a Peer to a Wireguard server instance",
+        "tags": [
+          "Peers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Peer data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Peer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the added Peer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Peer"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/peers/{peer_id}": {
+      "get": {
+        "summary": "Get single Peer",
+        "description": "Returns a single Peer by its ID",
+        "tags": [
+          "Peers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Peer"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Peer not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a Peer",
+        "description": "Updates a Peer",
+        "tags": [
+          "Peers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Peer data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Peer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the updated Peer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Peer"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Peer not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove an Peer from a Wireguard server instance",
+        "description": "Removes an existing Peer from a Wireguard server instance by its ID",
+        "tags": [
+          "Peers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, always returns true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "enum": [
+                    true
+                  ],
+                  "example": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Peer not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/peers/{peer_id}/allowed_ips": {
+      "get": {
+        "summary": "Get listing of all AllowedIPs of a Peer",
+        "description": "Returns a list of all existing AllowedIP entries of a Peer",
+        "tags": [
+          "Peer AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the parent Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PeerAllowedIp"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance or Peer not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add new AllowedIP to Peer",
+        "description": "Adds an AllowedIP entry to a Peer",
+        "tags": [
+          "Peer AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the parent Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "AllowedIP entry data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeerAllowedIp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the added AllowedIP entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeerAllowedIp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance or Peer not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/peers/{peer_id}/allowed_ips/{allowed_ip_id}": {
+      "get": {
+        "summary": "Get single AllowedIP entry",
+        "description": "Returns a single AllowedIP entry by its ID",
+        "tags": [
+          "Peer AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the parent Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "allowed_ip_id",
+            "in": "path",
+            "description": "ID of the AllowedIP entry",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeerAllowedIp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "AllowedIP entry not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an AllowedIP entry",
+        "description": "Updates an AllowedIP entry",
+        "tags": [
+          "Peer AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the parent Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "allowed_ip_id",
+            "in": "path",
+            "description": "ID of the AllowedIP entry",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "AllowedIP entry data",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeerAllowedIp"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK, returns the updated AllowedIP entry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeerAllowedIp"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "AllowedIP entry not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove an AllowedIP entry from a Wireguard server instance",
+        "description": "Removes an existing AllowedIP entry from a Wireguard server instance by its ID",
+        "tags": [
+          "Peer AllowedIPs"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the parent Wireguard server instance",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "peer_id",
+            "in": "path",
+            "description": "ID of the parent Peer",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "name": "allowed_ip_id",
+            "in": "path",
+            "description": "ID of the AllowedIP entry",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, always returns true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "enum": [
+                    true
+                  ],
+                  "example": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "AllowedIP entry not found"
+          }
+        }
+      }
+    },
+    "/api/v1/servers/{server_id}/reload": {
+      "post": {
+        "summary": "Reload Wireguard server instance",
+        "description": "Reloads a Wireguard server instance to apply new configuration changes",
+        "tags": [
+          "Servers"
+        ],
+        "parameters": [
+          {
+            "name": "server_id",
+            "in": "path",
+            "description": "ID of the Wireguard server instance to reload",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK, always returns true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean",
+                  "enum": [
+                    true
+                  ],
+                  "example": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key header"
+          },
+          "404": {
+            "description": "Wireguard server instance not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Server": {
+        "title": "Wireguard server instance",
+        "description": "Represents a Wireguard server instance on the host",
+        "type": "object",
+        "required": [
+          "name",
+          "interface_name",
+          "private_key",
+          "public_key",
+          "endpoint",
+          "listen_port",
+          "mtu",
+          "tunnel_ip",
+          "routed_subnet"
+        ],
+        "properties": {
+          "id": {
+            "title": "ID",
+            "description": "ID",
+            "type": "integer",
+            "example": 1,
+            "readOnly": true
+          },
+          "name": {
+            "title": "Instance Name",
+            "description": "Human readable name of the server instance",
+            "type": "string",
+            "example": "Primary Wireguard Server"
+          },
+          "private_key": {
+            "title": "Wireguard Private Key",
+            "description": "Private Key of the Wireguard server instance",
+            "type": "string",
+            "format": "base64",
+            "example": "cKka/80hKhH77QfqKX9FcmtoOICk4wH+sftB/j9Gi0Q="
+          },
+          "public_key": {
+            "title": "Wireguard Public Key",
+            "description": "Public Key of the Wireguard server instance",
+            "type": "string",
+            "format": "base64",
+            "example": "Wg+je/GrQrDV6Ik8ffHwRP1GKKeip876lT+HQVKJ4A0="
+          },
+          "endpoint": {
+            "title": "Endpoint Address",
+            "description": "Hostname or IP address of the server instace",
+            "type": "string",
+            "example": "wg01.some.domain.tld"
+          },
+          "listen_port": {
+            "title": "Listen Port",
+            "description": "Port the server instace listens on",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535,
+            "example": 51820
+          },
+          "mtu": {
+            "title": "Tunnel MTU Value",
+            "description": "MTU value of the tunnel network interface",
+            "type": "integer",
+            "minimum": 68,
+            "example": 1320
+          },
+          "tunnel_ip": {
+            "title": "Inner Tunnel IP Address",
+            "description": "IP address of the tunnel interface on the server side",
+            "type": "string",
+            "format": "ipv4",
+            "example": "100.64.0.1/24"
+          },
+          "routed_subnet": {
+            "title": "Routed Subnet Block",
+            "description": "Subnet block from which smaller subnets are routed to peers",
+            "type": "string",
+            "format": "ipv4",
+            "example": "100.65.0.0/16"
+          }
+        }
+      },
+      "ServerAllowedIp": {
+        "title": "AllowedIP entry for a local Wireguard server instance in peer configuration",
+        "description": "Represents an IP address or CIDR subnet peers of a Wireguard server instance will route towards the server through the tunnel",
+        "type": "object",
+        "required": [
+          "cidr"
+        ],
+        "properties": {
+          "id": {
+            "title": "ID",
+            "description": "ID",
+            "type": "integer",
+            "example": 1,
+            "readOnly": true
+          },
+          "cidr": {
+            "title": "IP CIDR",
+            "description": "IP address or subnet in CIDR notation, single IPs can be written using /32",
+            "type": "string",
+            "format": "ipv4",
+            "example": "100.64.0.0/10"
+          },
+          "server_id": {
+            "title": "Server ID",
+            "description": "ID of the server this AllowedIP entry belongs to",
+            "type": "integer",
+            "example": 1,
+            "readOnly": true
+          }
+        }
+      },
+      "Peer": {
+        "title": "Wireguard Peer",
+        "description": "Represents a Wireguard Peer on a local Wireguard server instance",
+        "type": "object",
+        "required": [
+          "name",
+          "public_key",
+          "tunnel_ip",
+          "preshared_key"
+        ],
+        "properties": {
+          "id": {
+            "title": "ID",
+            "description": "ID",
+            "type": "integer",
+            "example": 1,
+            "readOnly": true
+          },
+          "name": {
+            "title": "Name",
+            "description": "Human readable peer name",
+            "type": "string",
+            "example": "John Doe CGHMN Router"
+          },
+          "public_key": {
+            "title": "Wireguard Public Key",
+            "description": "Public key of the Wireguard peer",
+            "type": "string",
+            "format": "base64",
+            "example": "+2AEUd4r3usyz4Rw6Gh4gMD6BX9EhTTq0dYNblNUNGM="
+          },
+          "tunnel_ip": {
+            "title": "Tunnel IP address",
+            "description": "IP address of the peer inside the tunnel network in CIDR notation with /32",
+            "type": "string",
+            "format": "ipv4",
+            "example": "100.64.0.2/32"
+          },
+          "user_id": {
+            "title": "User ID",
+            "description": "ID of the user this peer belongs to (not currently used)",
+            "type": "integer",
+            "nullable": true,
+            "example": null
+          },
+          "server_id": {
+            "title": "Server ID",
+            "description": "ID of the server this peer belongs to",
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "PeerAllowedIp": {
+        "title": "AllowedIP entry for a peer",
+        "description": "Represents an IP address or CIDR subnet the the server will route towards a peer",
+        "type": "object",
+        "required": [
+          "cidr"
+        ],
+        "properties": {
+          "id": {
+            "title": "ID",
+            "description": "ID",
+            "type": "integer",
+            "example": 1,
+            "readOnly": true
+          },
+          "cidr": {
+            "title": "IP CIDR",
+            "description": "IP address or subnet in CIDR notation, single IPs can be written using /32",
+            "type": "string",
+            "format": "ipv4",
+            "example": "100.65.2.0/24"
+          },
+          "peer_id": {
+            "title": "Peer ID",
+            "description": "ID of the peer this AllowedIP entry belongs to",
+            "type": "integer",
+            "example": 1,
+            "readOnly": true
+          }
+        }
+      },
+      "array_of_ServerAllowedIp": {
+        "title": "Array of AllowedIP entries for a Wireguard server instance",
+        "type": "object",
+        "properties": {
+          "allowed_ips": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ServerAllowedIp"
+            }
+          }
+        }
+      },
+      "array_of_Peer": {
+        "title": "Array of Peers",
+        "type": "object",
+        "properties": {
+          "peers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Peer"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    }
+  }
+}
