@@ -139,7 +139,7 @@ class WireguardConnector
 		}
 
 		Process::input(self::generate_server_config($server))
-			->run("sudo /usr/bin/wg setconf '{$server->interface_name}' /dev/stdin")
+			->run("sudo /usr/bin/wg syncconf '{$server->interface_name}' /dev/stdin")
 			->throw();
 
 		// Add routes too
