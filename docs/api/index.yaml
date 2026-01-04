@@ -10,6 +10,10 @@ info:
 servers:
   - url: http://localhost:8000
     description: "Local development server"
+  - url: http://100.64.11.201
+    description: "CGHMN hosted development server"
+  - url: http://100.64.12.2
+    description: "CGHMN production server - Be careful, please"
 
 paths:
   /api/v1/servers:
