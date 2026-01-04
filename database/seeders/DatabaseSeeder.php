@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
 	public function run(): void
 	{
 		if (Env::get('APP_ENV') == 'local') {
+			$this->call(ServerSeeder::class);
 			$this->call(ServerAllowedIpSeeder::class);
 			$this->call(PeerSeeder::class);
 			$this->call(PeerAllowedIpSeeder::class);

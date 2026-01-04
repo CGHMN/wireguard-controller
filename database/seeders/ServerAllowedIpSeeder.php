@@ -16,7 +16,7 @@ class ServerAllowedIpSeeder extends Seeder
     {
 		$server = Server::firstOrFail();
 
-		foreach(['192.0.2.1/24', '240.0.0.0/16'] as $cidr) {
+		foreach(['192.0.2.0/24', '240.0.0.0/16'] as $cidr) {
 			ServerAllowedIp::create([
 				'cidr' => $cidr,
 				'server_id' => $server->id
