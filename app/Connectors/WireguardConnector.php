@@ -59,12 +59,11 @@ class WireguardConnector
 	/**
 	 * Creates a configuration file for one of the server peers
 	 * @param \App\Models\Server $server Instance of Server model to generate peer config with
-	 * @param string $peer_id Database ID of Peer to generate peer config for
+	 * @param \App\Models\Peer $peer Peer to generate peer config for
 	 * @return string Wireguard configuration as multi-line string
 	 */
-	public static function generate_peer_config(Server $server, string $peer_id): string
+	public static function generate_peer_config(Server $server, Peer $peer): string
 	{
-		$peer = Peer::where('server_id', $server->id)->findOrFail($peer_id);
 		$server_tunnel_network = IpAddressHelper::network_address_from_cidr(
 			$server->tunnel_ip
 		);
@@ -83,8 +82,14 @@ class WireguardConnector
 		$output = <<<PEER_CONFIG
 		[Interface]
 		Address = {$peer->tunnel_ip}
-		PrivateKey = <insert-private-key-here>
+		PEER_CONFIG;
 
+		$output .= "\n" . ($peer->private_key?
+			"PrivateKey = {$peer->private_key}":
+			'PrivateKey = <insert-private-key-here>'
+		) . "\n\n";
+
+		$output .= <<<PEER_CONFIG
 		[Peer]
 		PublicKey = {$server->public_key}
 		AllowedIPs = {$allowed_ips_str}

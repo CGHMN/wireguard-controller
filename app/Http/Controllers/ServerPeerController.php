@@ -80,7 +80,8 @@ class ServerPeerController extends Controller
 	public function generate_peer_configuration(Request $request, string $server_id, string $peer_id)
 	{
 		$server = Server::findOrFail($server_id);
-		return WireguardConnector::generate_peer_config($server, $peer_id);
+		$peer = Peer::findOrFail($peer_id);
+		return WireguardConnector::generate_peer_config($server, $peer);
 	}
 
 	/**
@@ -107,7 +108,10 @@ class ServerPeerController extends Controller
 		}
 
 		// Generate PSK only if query parameter 'no_psk' is not set
-		$psk = $request->query('no_psk')? null : WireguardConnector::generate_psk();
+		$psk = null;
+		if ($request->missing('no_psk') || $request->query('no_psk') == 'false') {
+			$psk = WireguardConnector::generate_psk();
+		}
 
 		$peer = Peer::create([
 			'name' => $request->string('name'),
@@ -130,10 +134,10 @@ class ServerPeerController extends Controller
 		// Add private key to this peer for the HTTP response, but do not save it into the database
 		$peer->private_key = $private_key;
 
-		if ($request->input('return_config') == "true") {
-			return WireguardConnector::generate_peer_config($server, $peer->id);
+		if ($request->missing('return_config') || $request->input('return_config') == "false") {
+			return $peer;
 		}
 
-		return $peer;
+		return WireguardConnector::generate_peer_config($server, $peer);
 	}
 }

@@ -21,9 +21,9 @@ Route::prefix('v1')
 		Route::apiResource('servers.peers', ServerPeerController::class);
 		Route::apiResource('servers.peers.allowed_ips', ServerPeerAllowedIpController::class);
 
-		Route::post('servers/{server_id}/reload', [WireguardController::class, 'reload']);
-		Route::post('servers/{server_id}/gen_new_peer', [ServerPeerController::class, 'generate_new_peer']);
-		Route::get('servers/{server_id}/peers/{peer_id}/config', [ServerPeerController::class, 'generate_peer_configuration']);
+		Route::post('servers/{server}/reload', [WireguardController::class, 'reload']);
+		Route::post('servers/{server}/gen_new_peer', [ServerPeerController::class, 'generate_new_peer']);
+		Route::get('servers/{server}/peers/{peer}/config', [ServerPeerController::class, 'generate_peer_configuration']);
 	});
 
 Route::get('/user', function (Request $request) {
