@@ -9,6 +9,14 @@
     {
       "url": "http://localhost:8000",
       "description": "Local development server"
+    },
+    {
+      "url": "http://100.64.11.201",
+      "description": "CGHMN hosted development server"
+    },
+    {
+      "url": "http://100.64.12.2",
+      "description": "CGHMN production server - Be careful, please"
     }
   ],
   "security": [
@@ -1056,7 +1064,7 @@
       },
       "delete": {
         "summary": "Remove an AllowedIP entry from a Wireguard server instance",
-        "description": "Removes an existing AllowedIP entry from a Wireguard server instance by its ID",
+        "description": "Removes an existing AllowedIP entry from a peer by its ID",
         "tags": [
           "Peer AllowedIPs"
         ],
