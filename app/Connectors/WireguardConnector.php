@@ -145,11 +145,13 @@ class WireguardConnector
 		// Add routes too
 		$ip_route = json_decode(exec("ip --json route"));
 		$known_routes = [];
-		foreach ($ip_route as $route) $known_routes[] = $route->dst;
+		foreach ($ip_route as $route) $known_routes[] = explode('/', $route->dst)[0];
 		foreach ($server->peers as $peer) {
 			foreach ($peer->allowed_ips as $ip) {
-				if (!in_array($ip->cidr, $known_routes)) {
-					$known_routes[] = $ip->cidr;
+				$ip_no_cidr = explode('/', $ip->cidr);
+
+				if (!in_array($ip_no_cidr, $known_routes)) {
+					$known_routes[] = $ip_no_cidr;
 					Process::run("sudo /sbin/ip route add {$ip->cidr} dev {$server->interface_name}")
 						->throw();
 				}
