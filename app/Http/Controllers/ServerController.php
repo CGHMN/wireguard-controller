@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
 use App\Models\Server;
@@ -9,7 +10,9 @@ use App\Models\Server;
 class ServerController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Fetch a listing of all existing Wireguard server instances.
+	 * 
+	 * @return Collection<Server> List of Wireguard server instances
      */
     public function index()
     {
@@ -17,7 +20,9 @@ class ServerController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created Wireguard server instance in storage.
+	 * 
+	 * @return Server Newly created Wireguard server instance
      */
     public function store(Request $request)
     {
@@ -25,7 +30,9 @@ class ServerController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Fetch a Wireguard server instance.
+	 * 
+	 * @return Server Wireguard server instance
      */
     public function show(string $id)
     {
@@ -34,7 +41,9 @@ class ServerController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update a Wireguard server instance.
+	 * 
+	 * @return Server Updated Wireguard server instance
      */
     public function update(Request $request, string $id)
     {
@@ -44,7 +53,9 @@ class ServerController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove a Wireguard server instance from storage.
+	 * 
+	 * @return true Always returns true
      */
     public function destroy(string $id)
     {
