@@ -148,7 +148,7 @@ class WireguardConnector
 		foreach ($ip_route as $route) $known_routes[] = explode('/', $route->dst)[0];
 		foreach ($server->peers as $peer) {
 			foreach ($peer->allowed_ips as $ip) {
-				$ip_no_cidr = explode('/', $ip->cidr);
+				$ip_no_cidr = explode('/', $ip->cidr)[0];
 
 				if (!in_array($ip_no_cidr, $known_routes)) {
 					$known_routes[] = $ip_no_cidr;
