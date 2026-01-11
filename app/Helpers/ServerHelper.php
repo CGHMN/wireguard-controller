@@ -24,7 +24,11 @@ class ServerHelper
 			IpAddressHelper::broadcast_address_from_cidr($server->tunnel_ip, false)
 		) - 1;
 
-		$existing_ips = [];
+		// Skip the first two IPs
+		$existing_ips = [
+			$first_address,
+			$first_address + 1
+		];
 
 		foreach (Peer::get()->pluck('tunnel_ip')->toArray() as $ip) {
 			$existing_ips[] = ip2long(IpAddressHelper::strip_cidrmask($ip));
@@ -54,7 +58,11 @@ class ServerHelper
 			IpAddressHelper::broadcast_address_from_cidr($server->routed_subnet, false)
 		) - $ips_per_subnet - 1;
 
-		$existing_ips = [];
+		// Skip the first two subnets
+		$existing_ips = [
+			$first_address + $ips_per_subnet,
+			$first_address + ($ips_per_subnet * 2),
+		];
 
 		foreach (PeerAllowedIp::get() as $allowed_ip) {
 			$existing_ips[] = ip2long(IpAddressHelper::strip_cidrmask($allowed_ip->cidr));
