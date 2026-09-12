@@ -1,6 +1,7 @@
 <?php
 
 use App\Connectors\WireguardConnector;
+use App\Http\Controllers\WgEndpointApiController;
 use App\Http\Controllers\WireguardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,8 +25,10 @@ Route::prefix('v1')
 		Route::post('servers/{server}/reload', [WireguardController::class, 'reload']);
 		Route::post('servers/{server}/gen_new_peer', [ServerPeerController::class, 'generate_new_peer']);
 		Route::get('servers/{server}/peers/{peer}/config', [ServerPeerController::class, 'generate_peer_configuration']);
+
+		Route::get('wg-endpoint-api/{interface}', [WgEndpointApiController::class, 'getInterfaceConfiguration']);
 	});
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+	return $request->user();
 });

@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * App\Models\Server
- * 
+ *
  * @property-read integer $id Database ID of the server instance
+ * @property-read \DateTime $created_at Creation timestamp of this server instance in database
+ * @property-read \DateTime $updated_at Last update timestamp of this server instance in database
  * @property string $name Human readable name of the instance
  * @property string $interface_name Name of the Linux kernel Wireguard interface
  * @property string $private_key Wireguard private key
@@ -16,14 +19,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $endpoint Public server IP or hostname
  * @property integer $listen_port Port the server listens on
  * @property integer $mtu Tunnel MTU value
- * @property integer $tunnel_ip Inner tunnel IP address of server
- * @property integer $routed_subnet Subnet from which smaller subnets are routed to members
+ * @property string $tunnel_ip Inner tunnel IP address of server
+ * @property string $routed_subnet Subnet from which smaller subnets are routed to members
+ * @property-read Collection<Peer> $peers List of all peers assigned to this server
  */
-class Server extends Model
+class Server extends WireguardComponentBaseModel
 {
 	/**
 	 * Mass-assignable variables
-	 * 
+	 *
 	 * @var array<string>
 	 */
 	protected $fillable = [
@@ -40,7 +44,7 @@ class Server extends Model
 
 	/**
 	 * Attributes hidden from serialization of model
-	 * 
+	 *
 	 * @var array<string>
 	 */
 	protected $hidden = [
@@ -49,14 +53,14 @@ class Server extends Model
 
 	/**
 	 * Attributes appended to serialization of model
-	 * 
+	 *
 	 * @var array<string>
 	 */
 	protected $appends = [];
 
 	/**
 	 * Explicitly cast attributes
-	 * 
+	 *
 	 * @return array<string, string>
 	 */
 	protected function casts(): array
