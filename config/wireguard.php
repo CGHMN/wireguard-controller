@@ -2,7 +2,7 @@
 
 return [
 	'keepalive' => intval(env('WG_KEEPALIVE', 15)),
-	'interface_management' => (bool) env('WG_DISABLE_INTERFACE_MANAGEMENT', false),
+	'interface_management' => !((bool) env('WG_DISABLE_INTERFACE_MANAGEMENT', false)),
 	'wg_endpoint_api' => [
 		'push_enabled' => (bool) env('WG_ENDPOINT_API_HOSTS', false),
 		'hosts' => strstr(env("WG_ENDPOINT_API_HOSTS", ""), '@') ?
