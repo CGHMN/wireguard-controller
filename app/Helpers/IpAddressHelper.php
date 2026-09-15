@@ -72,13 +72,21 @@ class IpAddressHelper
 	 * Tries to find the routed subnet CIDR matching to a give tunnel IP
 	 * @param string $tunnel_ip Tunnel IP either as standalone IPv4 address or in CIDR notation
 	 * @param string $routed_subnet_cidr Base routed subnet IP address in CIDR notation
+	 * @param string $tunnel_ip_base The starting tunnel IP as standalone IPv4 address or in CIDR notation
 	 * @return ?string Matching routed subnet for the tunnel in CIDR notation
 	 */
-	public static function routed_subnet_from_tunnel_ip(string $tunnel_ip, string $routed_subnet_cidr, int $routed_subnet_size = 24): string
+	public static function routed_subnet_from_tunnel_ip(string $tunnel_ip, string $routed_subnet_cidr,
+		string $tunnel_ip_base, int $routed_subnet_size = 24): string
 	{
-		preg_match('~(\d+)\.(\d+)\.(\d+)\.(\d+)/?(\d+)?~', $routed_subnet_cidr, $ro);
-		preg_match('~(\d+)\.(\d+)\.(\d+)\.(\d+)/?(\d+)?~', $tunnel_ip, $to);
+		// Remove the CIDR notation using regex.
+		preg_match('/^((?:\d{1,3}\.){3}\d{1,3})(?:\/\d{1,2})?$/', $tunnel_ip, $clean_tunnel_ip);
+		preg_match('/^((?:\d{1,3}\.){3}\d{1,3})(?:\/\d{1,2})?$/', $routed_subnet_cidr, $clean_subnet);
+		preg_match('/^((?:\d{1,3}\.){3}\d{1,3})(?:\/\d{1,2})?$/', $tunnel_ip_base, $clean_tunnel_ip_base);
 
-		return "{$ro[1]}.{$ro[2]}.{$to[4]}.{$ro[4]}/{$routed_subnet_size}";
+		$clean_tunnel_ip = ip2long($clean_tunnel_ip[1]);
+		$clean_subnet = ip2long($clean_subnet[1]);
+		$clean_tunnel_ip_base = ip2long($clean_tunnel_ip_base[1]);
+
+		return long2ip(($clean_tunnel_ip - $clean_tunnel_ip_base)*pow(2, 32 - $routed_subnet_size) + $clean_subnet) . "/{$routed_subnet_size}";
 	}
 }

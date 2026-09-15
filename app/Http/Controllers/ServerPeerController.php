@@ -102,7 +102,7 @@ class ServerPeerController extends Controller
 
 		$tunnel_ip = ServerHelper::get_next_tunnel_ip($server);
 
-		$routed_subnet = IpAddressHelper::routed_subnet_from_tunnel_ip($tunnel_ip, $server->routed_subnet);
+		$routed_subnet = IpAddressHelper::routed_subnet_from_tunnel_ip($tunnel_ip, $server->routed_subnet, $server->tunnel_ip);
 		if ($allowed_ip_in_use = PeerAllowedIp::firstWhere('cidr', $routed_subnet)) {
 			throw new Exception("The routed subnet {$routed_subnet} for this peer is already in use by peer ID {$allowed_ip_in_use->peer_id}");
 		}
