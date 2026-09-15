@@ -10,6 +10,7 @@
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "slacker775/ipcalc": "^2.0",
         "wotz/laravel-swagger-ui": "^1.2"
     },
     "require-dev": {

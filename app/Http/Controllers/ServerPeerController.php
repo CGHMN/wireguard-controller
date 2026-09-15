@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Connectors\WireguardConnector;
-use App\Helpers\IpAddressHelper;
 use App\Helpers\ServerHelper;
 use App\Models\PeerAllowedIp;
 use App\Models\Server;
-use Exception;
 use Illuminate\Http\Request;
 
 use App\Models\Peer;
@@ -94,18 +92,13 @@ class ServerPeerController extends Controller
 		$public_key = (string) $request->string('public_key');
 		$private_key = null;
 
-		if (! $public_key) {
+		if (!$public_key) {
 			$keys = WireguardConnector::generate_key_pair();
 			$public_key = $keys->public_key;
 			$private_key = $keys->private_key;
 		}
 
-		$tunnel_ip = ServerHelper::get_next_tunnel_ip($server);
-
-		$routed_subnet = IpAddressHelper::routed_subnet_from_tunnel_ip($tunnel_ip, $server->routed_subnet, $server->tunnel_ip);
-		if ($allowed_ip_in_use = PeerAllowedIp::firstWhere('cidr', $routed_subnet)) {
-			throw new Exception("The routed subnet {$routed_subnet} for this peer is already in use by peer ID {$allowed_ip_in_use->peer_id}");
-		}
+		$addresses = ServerHelper::next_free_ip_addresses($server);
 
 		// Generate PSK only if query parameter 'no_psk' is not set
 		$psk = null;
@@ -117,12 +110,12 @@ class ServerPeerController extends Controller
 			'name' => $request->string('name'),
 			'public_key' => $public_key,
 			'preshared_key' => $psk,
-			'tunnel_ip' => $tunnel_ip,
+			'tunnel_ip' => $addresses->tunnel_ip->getDq(),
 			'server_id' => $server->id
 		]);
 
 		PeerAllowedIp::create([
-			'cidr' => $routed_subnet,
+			'cidr' => "{$addresses->routed_subnet->getDq()}/{$addresses->routed_subnet->subnet()}",
 			'peer_id' => $peer->id
 		]);
 
@@ -131,13 +124,10 @@ class ServerPeerController extends Controller
 		$server->refresh();
 		WireguardConnector::apply_config($server);
 
-		// Add private key to this peer for the HTTP response, but do not save it into the database
-		$peer->private_key = $private_key;
-
 		if ($request->missing('return_config') || $request->input('return_config') == "false") {
 			return $peer;
 		}
 
-		return WireguardConnector::generate_peer_config($server, $peer);
+		return WireguardConnector::generate_peer_config($server, $peer, $private_key);
 	}
 }

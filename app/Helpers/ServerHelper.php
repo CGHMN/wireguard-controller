@@ -2,77 +2,75 @@
 
 namespace App\Helpers;
 
-use App\Models\Peer;
-use App\Models\PeerAllowedIp;
+use IPCalc\Address;
+
 use App\Models\Server;
-use Exception;
-use Log;
+use IPCalc\Network;
 
 class ServerHelper
 {
 	/**
-	 * Finds the next free peer tunnel IP of a server
-	 * @param \App\Models\Server $server Server instance to process
-	 * @return string Tunnel IP in CIDR notation (/32 mask)
+	 * Get the next free tunnel and routed subnet IP addresses from the given server instance
+	 * @param Server $server Server instance to get the addresses from
+	 * @param int $routed_subnet_cidr_size Size of the resulting routed subnet
+	 * @return object{
+	 *   tunnel_ip: Address,
+	 *   routed_subnet: Network
+	 * }
 	 */
-	public static function get_next_tunnel_ip(Server $server): string
+	public static function next_free_ip_addresses(Server $server, int $routed_subnet_cidr_size = 24): object
 	{
-		$first_address = ip2long(
-			IpAddressHelper::network_address_from_cidr($server->tunnel_ip, false)
-		) + 2;
-		$last_address = ip2long(
-			IpAddressHelper::broadcast_address_from_cidr($server->tunnel_ip, false)
-		) - 1;
+		$server_tunnel_network = new Network($server->tunnel_ip);
+		$server_routed_network = new Network($server->routed_subnet);
 
-		// Skip the first two IPs
-		$existing_ips = [
-			$first_address,
-			$first_address + 1
-		];
+		$last_tunnel_ip = $server->peers
+			// Turn each tunnel IP for peer into an Address object
+			->map(fn($e) => (new Address($e->tunnel_ip, 32)))
+			// Filter out addresses which do not lie within the server tunnel network, like single IP allocations
+			->filter(fn($e) => $server_tunnel_network->contains($e))
+			// Add the server tunnel IP itself as the lowest used IP address limit
+			->add(new Address($server->tunnel_ip, 32))
+			// Sort tunnel IP addresses in ascending order
+			->sort(fn($a, $b) => $a->getAddress() - $b->getAddress())
+			// Get the largest (and thus last used) IP address from the list
+			->last();
 
-		foreach (Peer::get()->pluck('tunnel_ip')->toArray() as $ip) {
-			$existing_ips[] = ip2long(IpAddressHelper::strip_cidrmask($ip));
+		if (!$last_tunnel_ip) {
+			// No existing tunnel IP found, this should not happen as the server itself is also counted
+			throw new \Exception("No existing tunnel IP addresses found on server '{$server->name}' (#{$server->id})");
 		}
 
-		for ($i = $first_address; $i <= $last_address; $i++) {
-			if (! in_array($i, $existing_ips))
-				return long2ip($i).'/32';
+		if ($last_tunnel_ip->getAddress() >= $server_tunnel_network->lastHost()->getAddress()) {
+			// Last tunnel IP is the last possible IP in the subnet, no more IPs are available
+			throw new \Exception("No more free tunnel IP addresses available on server '{$server->name}' (#{$server->id})");
 		}
 
-		throw new Exception('No free IP address is currently available in this tunnel network');
-	}
-
-	/**
-	 * Finds the next free peer routed subnet of a server
-	 * @param \App\Models\Server $server Server instance to process
-	 * @return string Routed subnet in CIDR notation
-	 */
-	public static function get_next_routed_subnet(Server $server, $size = 24): string
-	{
-		$ips_per_subnet = (2 ** (32 - $size));
-
-		$first_address = ip2long(
-			IpAddressHelper::network_address_from_cidr($server->routed_subnet, false)
+		$free_tunnel_ip = new Address($last_tunnel_ip->getAddress() + 1, 32);
+		$free_routed_subnet = new Network(
+			$server_routed_network->getAddress() + ($free_tunnel_ip->getAddress() - $server_tunnel_network->getAddress() + 1) * 256,
+			$routed_subnet_cidr_size
 		);
-		$last_address = ip2long(
-			IpAddressHelper::broadcast_address_from_cidr($server->routed_subnet, false)
-		) - $ips_per_subnet - 1;
 
-		// Skip the first two subnets
-		$existing_ips = [
-			$first_address + $ips_per_subnet,
-			$first_address + ($ips_per_subnet * 2),
+		// Ensure neither the tunnel IP nor routed subnet are actually in use
+		foreach ($server->peers as $peer) {
+			if ($free_tunnel_ip->eq($peer->tunnel_ip)) {
+				throw new \Exception("The next free tunnel IP {$free_tunnel_ip->getDq()} already belongs to peer '{$peer->name}' on server '{$server->name}' (# {$server->id})");
+			}
+
+			foreach ($peer->allowed_ips as $peer_allowed_ip) {
+				if ($free_routed_subnet->checkCollision(new Address($peer_allowed_ip->cidr))) {
+					throw new \Exception(
+						"Collision detected between next free routed subnet {$free_routed_subnet->getDq()}/{$free_routed_subnet->subnet()} " .
+						"and allowed IP entry {$peer_allowed_ip->cidr} for peer '{$peer->name}' on server '{$server->name}' (# {$server->id})"
+					);
+				}
+			}
+		}
+
+		return (object) [
+			'tunnel_ip' => $free_tunnel_ip,
+			'routed_subnet' => $free_routed_subnet
+
 		];
-
-		foreach (PeerAllowedIp::get() as $allowed_ip) {
-			$existing_ips[] = ip2long(IpAddressHelper::strip_cidrmask($allowed_ip->cidr));
-		}
-
-		for ($i = $first_address; $i <= $last_address; $i += $ips_per_subnet) {
-			if (! in_array($i, $existing_ips))
-				return long2ip($i)."/{$size}";
-		}
-
-		throw new Exception('No free routed subnet is currently available on this server');
 	}
 }

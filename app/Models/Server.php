@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $tunnel_ip Inner tunnel IP address of server
  * @property string $routed_subnet Subnet from which smaller subnets are routed to members
  * @property-read Collection<Peer> $peers List of all peers assigned to this server
+ * @property-read Collection<ServerAllowedIp> $allowed_ips List of allowed IPs routed towards this server
  */
 class Server extends WireguardComponentBaseModel
 {

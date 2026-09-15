@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3fddebcc208879de3ca3ab2ddccad41a",
+    "content-hash": "015c39041acf60a63b19601a29bec321",
     "packages": [
         {
             "name": "brick/math",
@@ -3411,6 +3411,49 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.1"
             },
             "time": "2025-09-04T20:59:21+00:00"
+        },
+        {
+            "name": "slacker775/ipcalc",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/slacker775/IPCalc.git",
+                "reference": "e27c540edf8efd1db01034538ccae408166d4457"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/slacker775/IPCalc/zipball/e27c540edf8efd1db01034538ccae408166d4457",
+                "reference": "e27c540edf8efd1db01034538ccae408166d4457",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "require-dev": {
+                "phpunit/php-code-coverage": "^9.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "IPCalc\\": "src/IPCalc/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "David Hollis",
+                    "email": "dhollis@davehollis.com"
+                }
+            ],
+            "description": "IP Address Calculation Classes",
+            "support": {
+                "issues": "https://github.com/slacker775/IPCalc/issues",
+                "source": "https://github.com/slacker775/IPCalc/tree/2.0.0"
+            },
+            "time": "2023-01-09T19:28:15+00:00"
         },
         {
             "name": "symfony/clock",
